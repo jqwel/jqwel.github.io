@@ -49,16 +49,27 @@ console.log(Date.now());
         // event_label: 'jqwel',
         event_callback: createFunctionWithTimeout(event_callback, 1000)
       });
+    });
+    $("#unformat").click(function () {
+      var event_callback = function() {
+        try {
+          var jsonarea = $("#jsonarea");
+          var t = jsonarea.val();
+          var p = eval('(' + t + ')');
+          var r = JSON.stringify(p);
+          jsonarea.val(r);
+        } catch (err) {
+          console.error(err);
+        }
+      };
 
-      // setTimeout(() => {
-      //   let temp = document.createElement("form");
-      //   temp.action = 'https://www.google.com';
-      //   temp.method = "get";
-      //   temp.target = "_blank";
-      //   temp.style.display = "none";
-      //   document.body.appendChild(temp);
-      //   temp.submit();
-      // }, 500);
+      var jsonarea = $("#jsonarea");
+      var t = jsonarea.val();
+      gtag('event', 'unformat_0', {
+        event_category: 'zh',
+        // event_label: 'jqwel',
+        event_callback: createFunctionWithTimeout(event_callback, 1000)
+      });
     });
   });
 })(window);
