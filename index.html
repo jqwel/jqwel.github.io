@@ -25,25 +25,26 @@
 
   <script src="www/vender/clipboard/dist/clipboard.min.js"></script>
 
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-137909852-1"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CG683EWQVD"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
 
-    gtag('config', 'UA-137909852-1');
+    gtag('config', 'G-CG683EWQVD');
   </script>
 </head>
 <body>
-<h1>Welcome to Github</h1>
-<p id="content"></p>
-<button class="btn btn-copy-0" data-clipboard-target="#content">
-  <img src="assets/images/clippy.svg" alt="Copy to clipboard" style="width: 20px; height: 20px;">
-</button>
+<h1>JSON</h1>
+<!--<p id="content"></p>-->
+<!--<button class="btn btn-copy-0" data-clipboard-target="#content">-->
+<!--  <img src="assets/images/clippy.svg" alt="Copy to clipboard" style="width: 20px; height: 20px;">-->
+<!--</button>-->
 <div role="form">
   <div class="form-group">
-    <textarea class="form-control" id="jsonarea" cols="30" rows="10">{abc:123}</textarea>
+    <textarea class="form-control" id="jsonarea" cols="30" rows="12" >{ABC:123,a:10,b:20,c:"30",d:40,e:50,f:60,g:70,h:80,i:90,j:100,k:110,l:120,m:130,n:140}
+    </textarea>
   </div>
   <div>
     <button class="btn btn-primary btn-format-0" id="format">Format JSON</button>

@@ -3,32 +3,23 @@ console.log(Date.now());
 
 (function (global) {
 
-
   new Clipboard('.btn');
 
   $(function () {
-    $.get('json/index.json', function (index) {
-      console.log(index.content)
-      // $("#content").html(index.content);
-    });
-    $(".btn-copy-0").click(function() {
-      gtag('event', 'copy-0', {
-        event_category: 'zh',
-        // event_label: 'jd',
-        event_callback: createFunctionWithTimeout(function() {
-          console.log('.btn')
-        }, 1000)
-      });
-    });
+    // $.get('json/index.json', function (index) {
+    //   console.log(index.content)
+    //   // $("#content").html(index.content);
+    // });
     $(".btn-copy-1").click(function() {
       gtag('event', 'copy-1', {
         event_category: 'zh',
         // event_label: 'jqwel',
         event_callback: createFunctionWithTimeout(function() {
-          console.log('.btn')
+          console.log('copy-1')
         }, 1000)
       });
     });
+
     $("#format").click(function () {
       var event_callback = function() {
         try {
@@ -41,7 +32,6 @@ console.log(Date.now());
           console.error(err);
         }
       };
-
       var jsonarea = $("#jsonarea");
       var t = jsonarea.val();
       gtag('event', 'format_0', {
@@ -50,6 +40,7 @@ console.log(Date.now());
         event_callback: createFunctionWithTimeout(event_callback, 1000)
       });
     });
+
     $("#unformat").click(function () {
       var event_callback = function() {
         try {
@@ -62,7 +53,6 @@ console.log(Date.now());
           console.error(err);
         }
       };
-
       var jsonarea = $("#jsonarea");
       var t = jsonarea.val();
       gtag('event', 'unformat_0', {
@@ -71,5 +61,6 @@ console.log(Date.now());
         event_callback: createFunctionWithTimeout(event_callback, 1000)
       });
     });
+    //
   });
 })(window);
