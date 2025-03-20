@@ -1,0 +1,26 @@
+{
+  "name": "jqwel.github.io",
+  "version": "1.0.0",
+  "description": "https://jqwel.github.io/",
+  "main": "index.html",
+  "scripts": {
+    "postinstall": "mkdir -p www/vender && cp -r node_modules/bootstrap/dist www/vender/bootstrap && cp -r node_modules/jquery/dist www/vender/jquery && cp -r node_modules/clipboard/dist www/vender/clipboard",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jqwel/jqwel.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jqwel/jqwel.github.io/issues"
+  },
+  "homepage": "https://github.com/jqwel/jqwel.github.io#readme",
+  "dependencies": {
+    "bootstrap": "^5.3.3",
+    "clipboard": "^2.0.11",
+    "jquery": "^3.7.1"
+  }
+}

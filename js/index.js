@@ -1,10 +1,6 @@
 'use strict';
-console.log(Date.now());
-
 (function (global) {
-
-  new Clipboard('.btn');
-
+  new ClipboardJS('.btn-copy-1');
   $(function () {
     // $.get('json/index.json', function (index) {
     //   console.log(index.content)
