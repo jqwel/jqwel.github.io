@@ -1,6 +1,6 @@
 'use strict';
 (function (global) {
-  new ClipboardJS('.btn-copy-1');
+  new ClipboardJS('.btn');
   $(function () {
     // $.get('json/index.json', function (index) {
     //   console.log(index.content)
