@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Excel 转 CSV</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+        #dropzone {
+            width: 100%;
+            padding: 50px;
+            border: 2px dashed #aaa;
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        #dropzone:hover {
+            border-color: #007bff;
+            color: #007bff;
+        }
+        #fileInput {
+            display: none;
+        }
+        #download-btn {
+            display: none;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>拖入或点击选择 Excel 文件，转换为 UTF-8 CSV</h2>
+<div id="dropzone">拖入或点击选择 Excel 文件</div>
+<input type="file" id="fileInput" accept=".xlsx,.xls" />
+<button id="download-btn">下载 CSV</button>
+
+<!-- 引入 SheetJS -->
+<!--<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>-->
+<script src="./www/vender/xlsx/xlsx.full.min.js"></script>
+<script>
+    let csvContent = '';
+
+    function handleFile(file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            csvContent = XLSX.utils.sheet_to_csv(firstSheet, { FS: ',', strip: true });
+            document.getElementById('download-btn').style.display = 'inline-block';
+            alert("转换成功，点击按钮下载 CSV。");
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+
+    dropzone.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file && file.name.match(/\.(xlsx|xls)$/)) {
+            handleFile(file);
+        } else {
+            alert('请上传有效的 Excel 文件 (.xlsx 或 .xls)');
+        }
+    });
+
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.style.borderColor = '#007bff';
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+        dropzone.style.borderColor = '#aaa';
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.style.borderColor = '#aaa';
+        const file = e.dataTransfer.files[0];
+        if (file && file.name.match(/\.(xlsx|xls)$/)) {
+            handleFile(file);
+        } else {
+            alert('请拖入有效的 Excel 文件 (.xlsx 或 .xls)');
+        }
+    });
+
+    document.getElementById('download-btn').addEventListener('click', () => {
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'converted.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+</script>
+
+</body>
+</html>
