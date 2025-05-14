@@ -5,24 +5,16 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="renderer" content="webkit">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="pragma" content="no-cache">
-  <meta http-equiv="cache-control" content="no-cache">
-  <meta http-equiv="expires" content="0">
   <meta name="keywords" content="keyword1,keyword2,keyword3">
   <meta name="description" content="This is my page">
-  <title>Welcome</title>
+  <title>工具箱 SPA</title>
 
-  <!-- Bootstrap 核心 CSS -->
+  <!-- Bootstrap 样式 -->
   <link rel="stylesheet" href="www/vender/bootstrap/dist/css/bootstrap.min.css">
-
-  <!-- jQuery -->
   <script src="www/vender/jquery/dist/jquery.min.js"></script>
-
-  <!-- Bootstrap 核心 JavaScript -->
   <script src="www/vender/bootstrap/dist/js/bootstrap.min.js"></script>
-
-  <!-- Clipboard.js -->
   <script src="www/vender/clipboard/clipboard.min.js"></script>
+  <script src="www/vender/xlsx/xlsx.full.min.js"></script>
 
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-CG683EWQVD"></script>
@@ -34,27 +26,183 @@
   </script>
 </head>
 <body>
-
-<div class="container mt-4">
-  <h1 class="mb-3">JSON Formatter</h1>
-
-  <div class="form-group">
-      <textarea class="form-control" id="jsonarea" rows="12">
-{ABC:123,a:10,b:20,c:"30",d:40,e:50,f:60,g:70,h:80,i:90,j:100,k:110,l:120,m:130,n:140}
-      </textarea>
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#/">工具箱</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTools">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarTools">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="#/json">JSON 格式化</a></li>
+        <li class="nav-item"><a class="nav-link" href="#/xlsx2csv">XLSX 转 CSV</a></li>
+        <!-- 更多工具 -->
+      </ul>
+    </div>
   </div>
+</nav>
 
-  <div class="d-flex gap-2">
-    <button class="btn btn-primary" id="format">Format JSON</button>
-    <button class="btn btn-info" id="unformat">Unformat JSON</button>
-    <button class="btn btn-success" data-clipboard-target="#jsonarea">Copy JSON</button>
-  </div>
-</div>
+<!-- SPA 主容器 -->
+<div class="container mt-4" id="app"></div>
 
-<!-- 自定义脚本 -->
-<script src="js/index.js"></script>
-<script src="js/theme.js"></script>
-<script src="js/createFunctionWithTimeout.js"></script>
+<!-- 页面脚本 -->
+<script>
+  // 简单的路由系统
+  const routes = {
+    '/': () => `<h1>欢迎使用工具箱</h1><p>请选择一个工具。</p>`,
+    '/json': renderJsonTool,
+    '/xlsx2csv': xlsc2csvTool,
+    // '/xlsx2csv': () => `<h1>XLSX 转 CSV</h1><p>TODO: 实现此工具页面</p>`,
+  };
 
+  function xlsc2csvTool() {
+    return `
+    <h2>拖入或点击选择 Excel 文件，转换为 UTF-8 CSV</h2>
+    <div id="dropzone" style="
+      width: 100%;
+      padding: 50px;
+      border: 2px dashed #aaa;
+      text-align: center;
+      color: #666;
+      margin-bottom: 20px;
+      cursor: pointer;
+    ">拖入或点击选择 Excel 文件</div>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;" />
+    <button id="download-btn" class="btn btn-primary" style="display: none;">下载 CSV</button>
+  `;
+  }
+
+
+  function renderJsonTool() {
+    return `
+      <h1 class="mb-3">JSON Formatter</h1>
+      <div class="form-group">
+        <textarea class="form-control" id="jsonarea" rows="12">{ABC:123,a:10,b:20,c:"30",d:40,e:50,f:60,g:70,h:80,i:90,j:100,k:110,l:120,m:130,n:140}</textarea>
+      </div>
+      <div class="d-flex gap-2 mt-2">
+        <button class="btn btn-primary" onclick="formatJson()">Format JSON</button>
+        <button class="btn btn-info" onclick="unformatJson()">Unformat JSON</button>
+        <button class="btn btn-success" data-clipboard-target="#jsonarea">Copy JSON</button>
+      </div>
+    `;
+  }
+
+  function formatJson() {
+    try {
+      const textarea = document.getElementById('jsonarea');
+      const obj = JSON.parse(textarea.value.replace(/([{,])\s*([a-zA-Z0-9_]+)\s*:/g, '$1"$2":'));
+      textarea.value = JSON.stringify(obj, null, 2);
+    } catch (err) {
+      alert('无效 JSON: ' + err.message);
+    }
+  }
+
+  function unformatJson() {
+    try {
+      formatJson();
+      const textarea = document.getElementById('jsonarea');
+      const obj = JSON.parse(textarea.value);
+      textarea.value = JSON.stringify(obj);
+    } catch (err) {
+      alert('无效 JSON: ' + err.message);
+    }
+  }
+
+  function router() {
+    const hash = location.hash.slice(1) || '/';
+    const route = routes[hash];
+    const app = document.getElementById('app');
+    if (route) {
+      const html = typeof route === 'function' ? route() : route;
+      app.innerHTML = html;
+      if (hash === '/json') {
+        new ClipboardJS('[data-clipboard-target]');
+      }
+      if (hash === '/xlsx2csv') {
+        initXlsx2CsvEvents(); // 初始化文件拖放和转换逻辑
+      }
+    } else {
+      app.innerHTML = `<h1>404 Not Found</h1>`;
+    }
+  }
+  function initXlsx2CsvEvents() {
+    let csvContent = '';
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const downloadBtn = document.getElementById('download-btn');
+
+    function handleFile(file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        csvContent = XLSX.utils.sheet_to_csv(firstSheet, { FS: ',', strip: true });
+        downloadBtn.style.display = 'inline-block';
+        alert("转换成功，点击按钮下载 CSV。");
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file && file.name.match(/\.(xlsx|xls)$/)) {
+        handleFile(file);
+      } else {
+        alert('请上传有效的 Excel 文件 (.xlsx 或 .xls)');
+      }
+    });
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = '#007bff';
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.style.borderColor = '#aaa';
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = '#aaa';
+      const file = e.dataTransfer.files[0];
+      if (file && file.name.match(/\.(xlsx|xls)$/)) {
+        handleFile(file);
+      } else {
+        alert('请拖入有效的 Excel 文件 (.xlsx 或 .xls)');
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'converted.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  window.addEventListener('hashchange', router);
+  window.addEventListener('load', router);
+</script>
+<script>
+  (function () {
+    function ChangeTheme() {
+      function updateTheme() {
+        const theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.body.setAttribute("data-bs-theme", theme);
+      }
+      updateTheme();
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", updateTheme);
+    }
+    $(function () {
+      ChangeTheme()
+    });
+  })()
+</script>
 </body>
 </html>
