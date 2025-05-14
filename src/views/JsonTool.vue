@@ -18,7 +18,7 @@ export default {
   name: "JsonTool",
   data() {
     return {
-      jsonText: '{ABC:123,a:10,b:20,c:"30",d:40,e:50,f:60,g:70,h:80,i:90,j:100,k:110,l:120,m:130,n:140}'
+      jsonText: '{"ABC":123,"a":10,"b":20,"c":"30","d":40,"e":50,"f":60,"g":70,"h":80,"i":90,"j":100,"k":110,"l":120,"m":130,"n":140}'
     };
   },
   // mounted() {

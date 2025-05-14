@@ -17,6 +17,9 @@
               <router-link class="nav-link" to="/json">JSON 格式化</router-link>
             </li>
             <li class="nav-item">
+              <router-link class="nav-link" to="/table2json">JSON表格</router-link>
+            </li>
+            <li class="nav-item">
               <router-link class="nav-link" to="/xlsx2csv">XLSX 转 CSV</router-link>
             </li>
             <!-- 更多工具可以加这里 -->
