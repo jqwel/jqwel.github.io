@@ -22,6 +22,9 @@
             <li class="nav-item">
               <router-link class="nav-link" to="/xlsx2csv">XLSX 转 CSV</router-link>
             </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="/go2json">GO 转 JSON</router-link>
+            </li>
             <!-- 更多工具可以加这里 -->
           </ul>
         </div>
