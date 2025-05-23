@@ -42,6 +42,7 @@ export default {
         const fixed = this.jsonText.replace(/([{,])\s*([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
         const obj = JSON.parse(fixed);
         this.jsonText = JSON.stringify(obj, null, 2);
+        this.$refs.jsonArea.select();
       } catch (err) {
         // alert("无效 JSON: " + err.message);
       }
@@ -51,6 +52,7 @@ export default {
         this.formatJson();
         const obj = JSON.parse(this.jsonText);
         this.jsonText = JSON.stringify(obj);
+        this.$refs.jsonArea.select();
       } catch (err) {
         // alert("无效 JSON: " + err.message);
       }
