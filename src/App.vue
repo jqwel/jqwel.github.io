@@ -14,16 +14,16 @@
         <div class="collapse navbar-collapse" id="navbarTools">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <router-link class="nav-link" to="/json">JSON 格式化</router-link>
+              <router-link class="nav-link" to="/json">JSON格式化</router-link>
             </li>
             <li class="nav-item">
               <router-link class="nav-link" to="/table2json">JSON表格</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/xlsx2csv">XLSX 转 CSV</router-link>
+              <router-link class="nav-link" to="/xlsx2csv">XLSX转CSV</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/go2json">GO 转 JSON</router-link>
+              <router-link class="nav-link" to="/go2json">GO转JSON</router-link>
             </li>
             <!-- 更多工具可以加这里 -->
           </ul>
