@@ -4,6 +4,7 @@ import JsonTool from '../views/JsonTool.vue';
 import Xlsx2Csv from '../views/Xlsx2Csv.vue';
 import Table2Json from "../views/Table2Json.vue";
 import Go2Json from "@/views/Go2Json.vue";
+import WordFinder from "@/views/WordFinder.vue";
 
 const routes = [
   { path: '/home', component: Home },
@@ -12,6 +13,7 @@ const routes = [
   { path: '/table2json', component: Table2Json },
   { path: '/xlsx2csv', component: Xlsx2Csv },
   { path: '/go2json', component: Go2Json },
+  { path: '/wordfinder', component: WordFinder },
 ];
 
 const router = createRouter({

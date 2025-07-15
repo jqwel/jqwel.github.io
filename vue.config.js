@@ -4,6 +4,14 @@ module.exports = defineConfig({
   outputDir: 'dist_gh',  // 仍然将其他文件放入 dist 文件夹
   // 修改 index.html 输出位置
   indexPath: '../index.html',  // 让 index.html 文件输出到项目根目录
-  publicPath: process.env.NODE_ENV === 'production' ? './dist_gh/' : '/',
-  transpileDependencies: true
+  publicPath: process.env.NODE_ENV === 'production' ? '/dist_gh/' : '/',
+  transpileDependencies: true,
+  chainWebpack: (config) => {
+    config.module
+      .rule('raw')
+      .test(/\.(txt|csv)$/) // 支持 .txt 和 .csv
+      .use('raw-loader')
+      .loader('raw-loader')
+      .end();
+  }
 })
