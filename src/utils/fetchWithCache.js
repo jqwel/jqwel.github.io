@@ -74,7 +74,7 @@ export async function fetchWithCache(input, total = 0, loading = null) {
   store.put({
     url: input,
     chunks: chunks,
-    expiry: Date.now() + 86400000 // 24小时有效期
+    expiry: Date.now() + 7 * 86400000 // 7 * 24小时有效期
   });
 
   setTimeout(cleanupExpiredCache, 1e3)
