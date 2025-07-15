@@ -238,6 +238,10 @@ function findValidWords() {
 }
 
 function speakWord(word) {
+  // no speak
+  if (word) {
+    return
+  }
   const utterance = new SpeechSynthesisUtterance(word)
   // 尝试找美音
   const voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en-US'))
