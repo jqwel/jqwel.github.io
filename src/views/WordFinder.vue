@@ -213,7 +213,7 @@ onMounted(async () => {
     })
     console.log(noVoiceCache.value)
 
-    const input_sel = `${process.env.VUE_APP_PUBLIC_BASE_URL}assets/words_20250715.txt`;
+    const input_sel = `${process.env.VUE_APP_PUBLIC_BASE_URL}assets/words_20250716.txt`;
     if (input_sel) {
       const words_sel = await fetchWithCache(input_sel, 0, null);
       words_sel.replaceAll("\r", "").split('\n').forEach(w => {

@@ -12,7 +12,7 @@ const PROXY_CONFIG = {
   protocol: 'http' // 若代理支持HTTPS可改为https
 };
 
-const WORD_FILE = path.join(__dirname, 'words_20250715.txt');
+const WORD_FILE = path.join(__dirname, 'words_20250716.txt');
 // const WORD_FILE = path.join(__dirname, 'temp.txt');
 const VOICE_DIR = path.join(__dirname, 'voices');
 const NO_VOICE_FILE = path.join(__dirname, 'novoice.txt');
