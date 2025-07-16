@@ -1,17 +1,46 @@
 const { defineConfig } = require('@vue/cli-service')
+const path = require('path')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+
 module.exports = defineConfig({
   // 输出文件夹
-  outputDir: 'dist_gh',  // 仍然将其他文件放入 dist 文件夹
+  outputDir: 'dist_gh',
+
   // 修改 index.html 输出位置
-  indexPath: '../index.html',  // 让 index.html 文件输出到项目根目录
+  indexPath: '../index.html',
+
   publicPath: process.env.NODE_ENV === 'production' ? '/dist_gh/' : '/',
+
   transpileDependencies: true,
+
   chainWebpack: (config) => {
     config.module
       .rule('raw')
-      .test(/\.(txt|csv)$/) // 支持 .txt 和 .csv
+      .test(/\.(txt|csv)$/)
       .use('raw-loader')
       .loader('raw-loader')
       .end();
+
+    // 删除 vue-cli 内部默认的 copy 插件
+    config.plugins.delete('copy');
+
+    // 重新添加 copy-webpack-plugin，只复制 public 除了 public/assets 的部分
+    config
+      .plugin('copy')
+      .use(CopyWebpackPlugin, [
+        {
+          patterns: [
+            {
+              from: path.resolve(__dirname, 'public'),
+              to: path.resolve(__dirname, 'dist_gh'),
+              globOptions: {
+                ignore: ['**/assets/**', '**/index.html'], // 关键：忽略 public/assets 内所有内容
+              },
+              noErrorOnMissing: true,
+              info: { minimized: true }
+            }
+          ],
+        },
+      ]);
   }
 })

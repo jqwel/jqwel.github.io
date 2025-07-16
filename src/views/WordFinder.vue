@@ -199,7 +199,7 @@ onBeforeUnmount(() => {
 
 onMounted(async () => {
   try {
-    const input_sel = `${process.env.VUE_APP_BASE_URL}assets/words_20250715.txt`;
+    const input_sel = `${process.env.VUE_APP_PUBLIC_BASE_URL}assets/words_20250715.txt`;
     if (input_sel) {
       const words_sel = await fetchWithCache(input_sel, 0, null);
       words_sel.replaceAll("\r", "").split('\n').forEach(w => {
@@ -208,7 +208,7 @@ onMounted(async () => {
       })
     }
 
-    const input = `${process.env.VUE_APP_BASE_URL}assets/ecdict_202507141516.csv`;
+    const input = `${process.env.VUE_APP_PUBLIC_BASE_URL}assets/ecdict_202507141516.csv`;
     const total = 35534978;
     const chunks = await fetchWithCache(input, total, loading);
 
