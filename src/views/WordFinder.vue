@@ -59,7 +59,7 @@
         </thead>
         <tbody>
         <tr v-for="(item, index) in paginatedWords" :key="index" class="hover:bg-gray-50">
-          <td class="px-3 py-1 border whitespace-pre word-cell" style="white-space: pre;" @click="speakWord(item.word)">{{ item.word }}</td>
+          <td class="px-3 py-1 border whitespace-pre" style="white-space: pre;" @click="speakWord(item.word)">{{ item.word }}</td>
           <td class="px-3 py-1 border text-gray-600 max-w-xs truncate" :title="item.translation">
             {{ item.translation }}
           </td>
@@ -270,13 +270,5 @@ a {
 }
 table {
   border-collapse: collapse;
-}
-.word-cell {
-  cursor: pointer;
-/*  user-select: none;*/
-  transition: background-color 0.15s ease;
-}
-.word-cell:hover {
-/*  background-color: #ebf4ff;*/
 }
 </style>
