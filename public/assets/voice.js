@@ -4,6 +4,7 @@ const https = require('https');
 const { promisify } = require('util');
 
 // 使用 __dirname 确保路径正确性 [1,2,3](@ref)
+// const WORD_FILE = path.join(__dirname, 'temp.txt');
 const WORD_FILE = path.join(__dirname, 'words_20250715.txt');
 const VOICE_DIR = path.join(__dirname, 'voices');
 const BASE_URL = 'https://audio.beingfine.cn/speeches/US/US-speech/';
@@ -57,13 +58,14 @@ const processWords = async () => {
 
     // 读取单词文件
     const data = await readFileAsync(WORD_FILE, 'utf8');
-    const words = data.replaceAll('\r', '').split('\n').filter(word => word.trim() !== '');
+    const words = data.replaceAll('\r', '').split('\n').filter(word => word.trim() !== '').sort(() => Math.random() - 0.5);
 
     console.log(`找到 ${words.length} 个单词`);
 
     // 处理每个单词
     for (const [index, word] of words.entries()) {
-      const fileName = `${word}.mp3`;
+      const safeWord = word.replaceAll(/\//g, '%2F');
+      const fileName = `${safeWord}.mp3`;
       const filePath = path.join(VOICE_DIR, fileName);
       const encodedWord = encodeURIComponent(word);
       const mp3Url = `${BASE_URL}${encodedWord}.mp3`;
@@ -76,7 +78,7 @@ const processWords = async () => {
 
       // 下载文件
       try {
-        console.log(`[${index + 1}/${words.length}] ↓ 下载: ${fileName}`);
+        console.log(`[${index + 1}/${words.length}] ↓ 下载: ${fileName} ${mp3Url}`);
         await downloadMP3(mp3Url, filePath);
         console.log(`[${index + 1}/${words.length}] ✓ 下载完成: ${fileName}`);
 

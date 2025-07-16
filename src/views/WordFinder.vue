@@ -160,8 +160,9 @@ let worker = null
 
 // 单词发音功能[6,7](@ref)
 function playWordSound(word) {
-  const encodedWord = encodeURIComponent(word);
-  const audioUrl = `https://audio.beingfine.cn/speeches/US/US-speech/${encodedWord}.mp3`;
+  const encodedWord = encodeURIComponent(word.replaceAll(/\//g, '%2F'));
+  // const audioUrl = `https://audio.beingfine.cn/speeches/US/US-speech/${encodedWord}.mp3`;
+  const audioUrl = `${process.env.VUE_APP_PUBLIC_BASE_URL}assets/voices/${encodedWord}.mp3`
 
   // 缓存优化：避免重复创建Audio对象[6](@ref)
   if (!audioCache.value[word]) {
