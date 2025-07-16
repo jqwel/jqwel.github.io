@@ -1,9 +1,9 @@
 <template>
   <div class="p-4">
-    <h2 class="mb-4">查词</h2>
+    <h2 class="mb-4 text-xl font-bold">查词工具</h2>
 
     <!-- 控制区 -->
-    <div class="mb-3">
+    <div class="mb-3 flex flex-wrap items-center gap-2">
       <label class="mr-2">随机字母数量：</label>
       <input type="number" v-model.number="letterCount" min="1" max="20" class="border px-2 py-1" />
       <button @click="generateRandomLetters" class="btn btn-info ml-2 bg-gray-200 px-3 py-1 rounded">生成</button>
@@ -35,7 +35,6 @@
       </button>
     </div>
 
-
     <!-- 加载提示 -->
     <div v-if="loading && typeof loading === 'string'" class="mt-4 text-center p-4 bg-gray-100 rounded">
       {{ loading }}
@@ -49,8 +48,8 @@
         <thead>
         <tr class="bg-gray-100 text-left">
           <th class="px-3 py-2 border">单词</th>
+          <th class="px-3 py-2 border">发音</th>
           <th class="px-3 py-2 border">翻译</th>
-          <th v-if="false" class="px-3 py-2 border text-center">长度</th>
           <th class="px-3 py-2 border text-center">§</th>
           <th v-for="(site, idx) in dictSites" :key="idx" class="px-3 py-2 border text-center">
             {{ site.name }}
@@ -59,15 +58,19 @@
         </thead>
         <tbody>
         <tr v-for="(item, index) in paginatedWords" :key="index" class="hover:bg-gray-50">
-          <td class="px-3 py-1 border whitespace-pre" style="white-space: pre;" @click="speakWord(item.word)">{{ item.word }}</td>
+          <td class="px-3 py-1 border whitespace-pre" style="white-space: pre;">{{ item.word }}</td>
+          <td class="px-3 py-1 border text-center">
+            <button v-if="dictionarySel[item.word]" @click="playWordSound(item.word)"
+                    class="btn btn-sm btn-outline-info">
+              🔊
+            </button>
+            <span v-if="!dictionarySel[item.word]">-</span>
+          </td>
           <td class="px-3 py-1 border text-gray-600 max-w-xs truncate" :title="item.translation">
             {{ item.translation }}
           </td>
-          <td v-if="false" class="px-3 py-1 border text-center">
-            {{ (item.word.match(/[a-zA-Z]/g) || []).length }}
-          </td>
           <td class="px-3 py-1 border text-center">
-            {{ dictionarySel[item.word] ? '⭐' : '' }}
+            {{ dictionarySel[item.word] ? '⭐' : '-' }}
           </td>
           <td
               v-for="(site, idx) in dictSites"
@@ -81,13 +84,12 @@
         </tr>
         </tbody>
       </table>
-
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import Papa from 'papaparse'
 import { fetchWithCache } from '@/utils/fetchWithCache'
 
@@ -111,6 +113,7 @@ const pageSize = 10
 const loading = ref(false)
 const dictionaryLoaded = ref(false)
 const dictionarySel = ref({})
+const audioCache = ref({}) // 音频缓存对象
 
 const freqAlphabet = [
   'e','e','e','e','e','e','e','e','e','e','e','e',
@@ -143,7 +146,7 @@ const sortedWords = computed(() =>
       const aStar = dictionarySel.value[a.word] ? 1 : 0
       const bStar = dictionarySel.value[b.word] ? 1 : 0
 
-      if (bStar !== aStar) return bStar - aStar // 星号优先（1排在前面）
+      if (bStar !== aStar) return bStar - aStar
       return sortDesc.value ? len(b) - len(a) : len(a) - len(b)
     })
 )
@@ -155,9 +158,48 @@ const paginatedWords = computed(() =>
 
 let worker = null
 
+// 单词发音功能[6,7](@ref)
+function playWordSound(word) {
+  const encodedWord = encodeURIComponent(word);
+  const audioUrl = `https://audio.beingfine.cn/speeches/US/US-speech/${encodedWord}.mp3`;
+
+  // 缓存优化：避免重复创建Audio对象[6](@ref)
+  if (!audioCache.value[word]) {
+    audioCache.value[word] = new Audio(audioUrl);
+
+    // 预加载但不立即播放
+    audioCache.value[word].load();
+
+    // 添加结束事件重置播放位置
+    audioCache.value[word].addEventListener('ended', () => {
+      audioCache.value[word].currentTime = 0;
+    });
+  }
+
+  // 播放处理
+  const audio = audioCache.value[word];
+  audio.currentTime = 0;
+  audio.play().catch(error => {
+    console.error('播放失败:', error);
+  });
+}
+
+// 清理音频资源[6](@ref)
+onBeforeUnmount(() => {
+  Object.values(audioCache.value).forEach(audio => {
+    audio.pause();
+    audio.src = '';
+  });
+  audioCache.value = {};
+
+  if (worker) {
+    worker.terminate();
+  }
+});
+
 onMounted(async () => {
   try {
-    const input_sel = `${process.env.VUE_APP_BASE_URL}assets/words_20250715.txt`
+    const input_sel = `${process.env.VUE_APP_BASE_URL}assets/words_20250715.txt`;
     if (input_sel) {
       const words_sel = await fetchWithCache(input_sel, 0, null);
       words_sel.replaceAll("\r", "").split('\n').forEach(w => {
@@ -166,8 +208,8 @@ onMounted(async () => {
       })
     }
 
-    const input = `${process.env.VUE_APP_BASE_URL}assets/ecdict_202507141516.csv`
-    const total = 35534978
+    const input = `${process.env.VUE_APP_BASE_URL}assets/ecdict_202507141516.csv`;
+    const total = 35534978;
     const chunks = await fetchWithCache(input, total, loading);
 
     const parsed = Papa.parse(chunks, {
@@ -209,7 +251,6 @@ function findValidWords() {
   const letters = manualLetters.value.toLowerCase().split('').filter(c => /[a-z]/.test(c))
 
   if (!letters.length) {
-    // 没输入字母：随机从 dictionarySel 拿10个词
     if (!selWords) {
       selWords = Object.keys(dictionarySel.value)
     }
@@ -227,7 +268,6 @@ function findValidWords() {
     return
   }
 
-  // 有输入字母，发给 worker
   loading.value = true
 
   let n = letters.length
@@ -235,21 +275,6 @@ function findValidWords() {
   if (n < 5) n = 5
   const padding = Array(n).fill('♥')
   worker.postMessage({ letters: [...letters, ...padding] })
-}
-
-function speakWord(word) {
-  // no speak
-  if (word) {
-    return
-  }
-  const utterance = new SpeechSynthesisUtterance(word)
-  // 尝试找美音
-  const voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en-US'))
-  if (voices.length) {
-    utterance.voice = voices[0]
-  }
-  utterance.rate = 0.9
-  speechSynthesis.speak(utterance)
 }
 
 function prevPage() {
@@ -264,11 +289,20 @@ function nextPage() {
 <style scoped>
 input {
   outline: none;
+  border: 1px solid #cbd5e0;
+  transition: border-color 0.2s;
 }
+
+input:focus {
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+}
+
 a {
   text-decoration: none;
 }
-table {
-  border-collapse: collapse;
+
+tr:hover {
+  background-color: rgba(20, 143, 20, 0.15);
 }
 </style>
