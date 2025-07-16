@@ -24,7 +24,7 @@ function buildTrie(words) {
 }
 
 function normalize(str) {
-  return str.toLowerCase().replace(/[^a-z0-9]/g, '♥')
+  return str.toLowerCase() // .replace(/[^a-z0-9]/g, '♥')
 }
 
 self.onmessage = function (e) {

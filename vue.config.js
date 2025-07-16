@@ -3,6 +3,14 @@ const path = require('path')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = defineConfig({
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'public'),
+      watch: {
+        ignored: [path.join(__dirname, 'public/assets/**')] // ✅ 绝对路径更可靠
+      }
+    }
+  },
   // 输出文件夹
   outputDir: 'dist_gh',
 

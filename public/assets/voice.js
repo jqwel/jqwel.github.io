@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const { promisify } = require('util');
-const {HttpsProxyAgent} = require('https-proxy-agent'); // 新增代理库 [1,7](@ref)
+const {HttpsProxyAgent} = require('https-proxy-agent');
+const {forEach} = require("core-js/stable/dom-collections"); // 新增代理库 [1,7](@ref)
 
 // 代理配置
 const PROXY_CONFIG = {
@@ -76,6 +77,11 @@ const processWords = async () => {
 
     console.log(`找到 ${words.length} 个单词 | 代理: ${PROXY_CONFIG.host}:${PROXY_CONFIG.port}`);
 
+    // words.entries().forEach((entry) => {
+    //   const [index, word] = entry;
+    //   console.log(index, word)
+    // })
+    // return
     // 处理每个单词
     for (const [index, word] of words.entries()) {
       const safeWord = word.replaceAll(/\//g, '%2F');
@@ -100,7 +106,7 @@ const processWords = async () => {
         const minDelay = 2000;
         const maxDelay = 3000;
         const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
-        await sleep(randomDelay); // 延迟3秒避免请求过频
+        await sleep(randomDelay / 1000); // 延迟3秒避免请求过频
       } catch (err) {
         console.error(`[${index + 1}/${words.length}] × 失败: ${err.message}`);
         if (err.message === "HTTP 404") {

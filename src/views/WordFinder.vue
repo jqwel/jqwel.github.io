@@ -60,13 +60,12 @@
         <tr v-for="(item, index) in paginatedWords" :key="index" class="hover:bg-gray-50">
           <td class="px-3 py-1 border whitespace-pre" style="white-space: pre;">{{ item.word }}</td>
           <td class="px-3 py-1 border text-center">
-            <button v-if="dictionarySel[item.word]"
-                    :disabled="noVoiceCache[item.word]"
+            <button v-if="dictionarySel[item.word] && !(noVoiceCache[item.word])"
                     @click="playWordSound(item.word)"
                     class="btn btn-sm btn-outline-info">
               🔊
             </button>
-            <span v-if="!dictionarySel[item.word]">-</span>
+            <span v-else>-</span>
           </td>
           <td class="px-3 py-1 border text-gray-600 max-w-xs truncate" :title="item.translation">
             {{ item.translation }}
@@ -263,7 +262,7 @@ function generateRandomLetters() {
 var selWords = null
 
 function findValidWords() {
-  const letters = manualLetters.value.toLowerCase().split('').filter(c => /[a-z]/.test(c))
+  const letters = manualLetters.value.toLowerCase().split('') // .filter(c => /[a-z]/.test(c))
 
   if (!letters.length) {
     if (!selWords) {
@@ -285,10 +284,11 @@ function findValidWords() {
 
   loading.value = true
 
-  let n = letters.length
-  if (n > 9) n = 9
-  if (n < 5) n = 5
-  const padding = Array(n).fill('♥')
+  // let n = letters.length
+  // if (n > 9) n = 9
+  // if (n < 5) n = 5
+  // const padding = Array(n).fill('♥')
+  const padding = `!""&$%'''()()*+,,,     -------......:;?[]_~`.split('')
   worker.postMessage({ letters: [...letters, ...padding] })
 }
 
