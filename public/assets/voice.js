@@ -55,6 +55,39 @@ const downloadMP3 = (url, savePath) => {
   });
 };
 
+async function extractedMethod(word, index, words, words_no_voice) {
+  const safeWord = word.replaceAll(/\//g, '%2F');
+  const fileName = `${safeWord}.mp3`;
+  const filePath = path.join(VOICE_DIR, fileName);
+  const encodedWord = encodeURIComponent(word);
+  const mp3Url = `${BASE_URL}${encodedWord}.mp3`;
+
+  if (fileExists(filePath)) {
+    console.log(`[${index + 1}/${words.length}] ✓ ${fileName} 已存在`);
+    return;
+  }
+  if (words_no_voice.includes(word)) {
+    console.log(`[${index + 1}/${words.length}] ✓ ${word} 没有发音`);
+    return;
+  }
+
+  try {
+    console.log(`[${index + 1}/${words.length}] ↓ 下载: ${word}`);
+    await downloadMP3(mp3Url, filePath);
+    console.log(`[${index + 1}/${words.length}] ✓ 下载完成`);
+    const minDelay = 2000;
+    const maxDelay = 3000;
+    const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
+    await sleep(randomDelay / 1000); // 延迟3秒避免请求过频
+  } catch (err) {
+    console.error(`[${index + 1}/${words.length}] × 失败: ${err.message}`);
+    if (err.message === "HTTP 404") {
+      fs.appendFileSync(NO_VOICE_FILE, `${word}\n`);
+    }
+    await sleep(3000); // 延迟3秒避免请求过频
+  }
+}
+
 // 主逻辑
 const processWords = async () => {
   const data_no_voice = await readFileAsync(NO_VOICE_FILE, 'utf8');
@@ -84,35 +117,13 @@ const processWords = async () => {
     // return
     // 处理每个单词
     for (const [index, word] of words.entries()) {
-      const safeWord = word.replaceAll(/\//g, '%2F');
-      const fileName = `${safeWord}.mp3`;
-      const filePath = path.join(VOICE_DIR, fileName);
-      const encodedWord = encodeURIComponent(word);
-      const mp3Url = `${BASE_URL}${encodedWord}.mp3`;
-
-      if (fileExists(filePath)) {
-        console.log(`[${index + 1}/${words.length}] ✓ ${fileName} 已存在`);
-        continue;
-      }
-      if (words_no_voice.includes(word)) {
-        console.log(`[${index + 1}/${words.length}] ✓ ${word} 没有发音`);
-        continue;
-      }
-
-      try {
-        console.log(`[${index + 1}/${words.length}] ↓ 下载: ${word}`);
-        await downloadMP3(mp3Url, filePath);
-        console.log(`[${index + 1}/${words.length}] ✓ 下载完成`);
-        const minDelay = 2000;
-        const maxDelay = 3000;
-        const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
-        await sleep(randomDelay / 1000); // 延迟3秒避免请求过频
-      } catch (err) {
-        console.error(`[${index + 1}/${words.length}] × 失败: ${err.message}`);
-        if (err.message === "HTTP 404") {
-          fs.appendFileSync(NO_VOICE_FILE, `${word}\n`);
-        }
-        await sleep(3000); // 延迟3秒避免请求过频
+      if (false) {
+        // s 1
+        extractedMethod(word, index, words, words_no_voice);
+        await sleep(2000); // 延迟3秒避免请求过频
+      } else {
+        // s 2
+        await extractedMethod(word, index, words, words_no_voice);
       }
     }
 
