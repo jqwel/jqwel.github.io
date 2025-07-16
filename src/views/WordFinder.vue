@@ -60,7 +60,9 @@
         <tr v-for="(item, index) in paginatedWords" :key="index" class="hover:bg-gray-50">
           <td class="px-3 py-1 border whitespace-pre" style="white-space: pre;">{{ item.word }}</td>
           <td class="px-3 py-1 border text-center">
-            <button v-if="dictionarySel[item.word]" @click="playWordSound(item.word)"
+            <button v-if="dictionarySel[item.word]"
+                    :disabled="noVoiceCache[item.word]"
+                    @click="playWordSound(item.word)"
                     class="btn btn-sm btn-outline-info">
               🔊
             </button>
@@ -113,6 +115,7 @@ const pageSize = 10
 const loading = ref(false)
 const dictionaryLoaded = ref(false)
 const dictionarySel = ref({})
+const noVoiceCache = ref({})
 const audioCache = ref({}) // 音频缓存对象
 
 const freqAlphabet = [
@@ -161,7 +164,6 @@ let worker = null
 // 单词发音功能[6,7](@ref)
 function playWordSound(word) {
   const encodedWord = encodeURIComponent(word.replaceAll(/\//g, '%2F'));
-  // const audioUrl = `https://audio.beingfine.cn/speeches/US/US-speech/${encodedWord}.mp3`;
   const audioUrl = `${process.env.VUE_APP_PUBLIC_BASE_URL}assets/voices/${encodedWord}.mp3`
 
   // 缓存优化：避免重复创建Audio对象[6](@ref)
@@ -170,6 +172,11 @@ function playWordSound(word) {
 
     // 预加载但不立即播放
     audioCache.value[word].load();
+    audioCache.value[word].addEventListener('error', (e) => {
+      console.error('音频加载失败（404或其他错误）:', e);
+      // 删除缓存中的无效对象
+      delete audioCache.value[word];
+    });
 
     // 添加结束事件重置播放位置
     audioCache.value[word].addEventListener('ended', () => {
@@ -200,6 +207,13 @@ onBeforeUnmount(() => {
 
 onMounted(async () => {
   try {
+    const no_voice_data = await fetchWithCache(`${process.env.VUE_APP_PUBLIC_BASE_URL}assets/novoice.txt`, 0, null, true);
+    no_voice_data.replaceAll("\r", "").split('\n').forEach(w => {
+      if (!w) return;
+      noVoiceCache.value[w] = true;
+    })
+    console.log(noVoiceCache.value)
+
     const input_sel = `${process.env.VUE_APP_PUBLIC_BASE_URL}assets/words_20250715.txt`;
     if (input_sel) {
       const words_sel = await fetchWithCache(input_sel, 0, null);

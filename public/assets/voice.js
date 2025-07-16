@@ -2,40 +2,47 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const { promisify } = require('util');
+const {HttpsProxyAgent} = require('https-proxy-agent'); // 新增代理库 [1,7](@ref)
 
-// 使用 __dirname 确保路径正确性 [1,2,3](@ref)
-// const WORD_FILE = path.join(__dirname, 'temp.txt');
+// 代理配置
+const PROXY_CONFIG = {
+  host: '127.0.0.1',
+  port: 3213,
+  protocol: 'http' // 若代理支持HTTPS可改为https
+};
+
 const WORD_FILE = path.join(__dirname, 'words_20250715.txt');
+// const WORD_FILE = path.join(__dirname, 'temp.txt');
 const VOICE_DIR = path.join(__dirname, 'voices');
+const NO_VOICE_FILE = path.join(__dirname, 'novoice.txt');
 const BASE_URL = 'https://audio.beingfine.cn/speeches/US/US-speech/';
 
-// 将回调函数转为 Promise 格式
+// Promise化工具函数
 const readFileAsync = promisify(fs.readFile);
-const writeFileAsync = promisify(fs.writeFile);
 const mkdirAsync = promisify(fs.mkdir);
 
-// 实现 sleep 功能（非阻塞）[9,10,11](@ref)
+// 非阻塞延迟
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // 检查文件是否存在
-const fileExists = (filePath) => {
-  try {
-    return fs.existsSync(filePath);
-  } catch (err) {
-    return false;
-  }
-};
+const fileExists = (filePath) => fs.existsSync(filePath);
 
-// 下载 MP3 文件
+// 下载MP3文件（支持代理）
 const downloadMP3 = (url, savePath) => {
   return new Promise((resolve, reject) => {
-    const file = fs.createWriteStream(savePath);
-    https.get(url, (response) => {
+    const agent = new HttpsProxyAgent(PROXY_CONFIG); // 创建代理Agent [1,7](@ref)
+
+    const reqOptions = {
+      agent, // 关键：注入代理配置
+      rejectUnauthorized: false // 忽略证书验证（适用于调试，生产环境需谨慎）[1](@ref)
+    };
+
+    https.get(url, reqOptions, (response) => {
       if (response.statusCode !== 200) {
         reject(new Error(`HTTP ${response.statusCode}`));
         return;
       }
-
+      const file = fs.createWriteStream(savePath);
       response.pipe(file);
       file.on('finish', () => {
         file.close();
@@ -49,8 +56,12 @@ const downloadMP3 = (url, savePath) => {
 
 // 主逻辑
 const processWords = async () => {
+  const data_no_voice = await readFileAsync(NO_VOICE_FILE, 'utf8');
+  const words_no_voice = data_no_voice.replaceAll('\r', '')
+    .split('\n')
+    .filter(word => word.trim() !== '');
   try {
-    // 确保 voices 目录存在
+    // 创建输出目录
     if (!fileExists(VOICE_DIR)) {
       await mkdirAsync(VOICE_DIR);
       console.log(`创建目录: ${VOICE_DIR}`);
@@ -58,9 +69,12 @@ const processWords = async () => {
 
     // 读取单词文件
     const data = await readFileAsync(WORD_FILE, 'utf8');
-    const words = data.replaceAll('\r', '').split('\n').filter(word => word.trim() !== '').sort(() => Math.random() - 0.5);
+    const words = data.replaceAll('\r', '')
+      .split('\n')
+      .filter(word => word.trim() !== '')
+      .sort(() => Math.random() - 0.5);
 
-    console.log(`找到 ${words.length} 个单词`);
+    console.log(`找到 ${words.length} 个单词 | 代理: ${PROXY_CONFIG.host}:${PROXY_CONFIG.port}`);
 
     // 处理每个单词
     for (const [index, word] of words.entries()) {
@@ -70,38 +84,49 @@ const processWords = async () => {
       const encodedWord = encodeURIComponent(word);
       const mp3Url = `${BASE_URL}${encodedWord}.mp3`;
 
-      // 检查文件是否存在
       if (fileExists(filePath)) {
         console.log(`[${index + 1}/${words.length}] ✓ ${fileName} 已存在`);
         continue;
       }
+      if (words_no_voice.includes(word)) {
+        console.log(`[${index + 1}/${words.length}] ✓ ${word} 没有发音`);
+        continue;
+      }
 
-      // 下载文件
       try {
-        console.log(`[${index + 1}/${words.length}] ↓ 下载: ${fileName} ${mp3Url}`);
+        console.log(`[${index + 1}/${words.length}] ↓ 下载: ${word}`);
         await downloadMP3(mp3Url, filePath);
-        console.log(`[${index + 1}/${words.length}] ✓ 下载完成: ${fileName}`);
-
-        // 下载完成后延迟 1 秒 [9,10](@ref)
-        await sleep(1000);
-        console.log(`[${index + 1}/${words.length}] ⏱️ 延迟 1 秒`);
+        console.log(`[${index + 1}/${words.length}] ✓ 下载完成`);
+        const minDelay = 2000;
+        const maxDelay = 3000;
+        const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
+        await sleep(randomDelay); // 延迟3秒避免请求过频
       } catch (err) {
-        console.error(`[${index + 1}/${words.length}] × 下载失败: ${fileName} (${err.message})`);
+        console.error(`[${index + 1}/${words.length}] × 失败: ${err.message}`);
+        if (err.message === "HTTP 404") {
+          fs.appendFileSync(NO_VOICE_FILE, `${word}\n`);
+        }
+        await sleep(3000); // 延迟3秒避免请求过频
       }
     }
 
     console.log('处理完成!');
   } catch (err) {
-    console.error('发生错误:', err.message);
-    await sleep(1000);
+    console.error('全局错误:', err.message);
   }
 };
 
-// 使用 require.main 判断是否直接执行 [6](@ref)
+// 执行入口
 if (require.main === module) {
-  console.log('脚本直接执行，开始处理...');
+  console.log('启动下载任务（使用代理）...');
   processWords();
 } else {
-  console.log('作为模块被引用，不自动执行');
-  module.exports = { processWords, downloadMP3 };
+  module.exports = {
+    processWords,
+    downloadMP3,
+    setProxy: (host, port) => {
+      PROXY_CONFIG.host = host;
+      PROXY_CONFIG.port = port;
+    }
+  };
 }

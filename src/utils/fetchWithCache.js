@@ -1,5 +1,5 @@
 
-export async function fetchWithCache(input, total = 0, loading = null) {
+export async function fetchWithCache(input, total = 0, loading = null, disableCache = false) {
   // 1. 创建 IndexedDB 数据库（基于浏览器原生 API）
   const dbName = 'FetchCacheDB';
   const storeName = 'responses';
@@ -23,6 +23,9 @@ export async function fetchWithCache(input, total = 0, loading = null) {
 
   // 2. 检查缓存是否存在且有效
   const cached = await new Promise(resolve => {
+    if (disableCache) {
+      return resolve();
+    }
     const tx = db.transaction(storeName, "readonly");
     const store = tx.objectStore(storeName);
     const request = store.get(input);
