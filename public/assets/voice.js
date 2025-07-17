@@ -75,8 +75,8 @@ async function extractedMethod(word, index, words, words_no_voice) {
     console.log(`[${index + 1}/${words.length}] ↓ 下载: ${word}`);
     await downloadMP3(mp3Url, filePath);
     console.log(`[${index + 1}/${words.length}] ✓ 下载完成`);
-    const minDelay = 2000;
-    const maxDelay = 3000;
+    const minDelay = 500;
+    const maxDelay = 1500;
     const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
     await sleep(randomDelay / 1000); // 延迟3秒避免请求过频
   } catch (err) {
@@ -84,7 +84,7 @@ async function extractedMethod(word, index, words, words_no_voice) {
     if (err.message === "HTTP 404") {
       fs.appendFileSync(NO_VOICE_FILE, `${word}\n`);
     }
-    await sleep(3000); // 延迟3秒避免请求过频
+    await sleep(1000); // 延迟3秒避免请求过频
   }
 }
 
@@ -120,7 +120,7 @@ const processWords = async () => {
       if (false) {
         // s 1
         extractedMethod(word, index, words, words_no_voice);
-        await sleep(2000); // 延迟3秒避免请求过频
+        await sleep(1000); // 延迟3秒避免请求过频
       } else {
         // s 2
         await extractedMethod(word, index, words, words_no_voice);
