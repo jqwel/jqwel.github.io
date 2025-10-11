@@ -1,0 +1,26 @@
+set showtabline=2
+set nolist
+set nopaste
+set autoindent
+set smartindent
+set cindent
+set lbr
+set fo+=mB
+set scrolloff=3
+set ts=2
+set sw=2
+set si
+set expandtab
+set nobackup
+set nu
+set enc=utf8
+set hls
+set is
+set ic
+set ignorecase smartcase
+set wrapscan
+set noerrorbells
+set novisualbell
+set magic
+set ruler
+set t_Co=256
