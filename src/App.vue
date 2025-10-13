@@ -61,6 +61,9 @@
             <li class="nav-item">
               <router-link class="nav-link" to="/timetool">时间转换</router-link>
             </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="/image-edit">图片编辑</router-link>
+            </li>
             <!-- 更多工具可以加这里 -->
           </ul>
         </div>

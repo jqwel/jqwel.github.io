@@ -6,6 +6,7 @@ import Table2Json from "../views/Table2Json.vue";
 import Go2Json from "@/views/Go2Json.vue";
 import WordFinder from "@/views/WordFinder.vue";
 import TimeTool from "@/views/TimeTool.vue";
+import ImageEdit from "@/views/ImageEdit.vue";
 
 const routes = [
   { path: '/home', component: Home },
@@ -16,6 +17,7 @@ const routes = [
   { path: '/go2json', component: Go2Json },
   { path: '/wordfinder', component: WordFinder },
   { path: '/timetool', component: TimeTool },
+  { path: '/image-edit', component: ImageEdit },
 ];
 
 const router = createRouter({
