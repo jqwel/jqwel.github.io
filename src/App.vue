@@ -56,10 +56,10 @@
               <router-link class="nav-link" to="/go2json">GO转JSON</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/wordfinder">查词</router-link>
+              <router-link class="nav-link" to="/wordfinder">查词工具</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/timetool">时间戳</router-link>
+              <router-link class="nav-link" to="/timetool">时间转换</router-link>
             </li>
             <!-- 更多工具可以加这里 -->
           </ul>
